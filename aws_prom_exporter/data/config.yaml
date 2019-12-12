@@ -1,0 +1,41 @@
+---
+
+# RDS config
+rds:
+  # Regex to use when discovering RDS instances
+  search_regex: '^.*-qa$'
+  # Suffix to use when getting credentials from Vault (`<rds_master_id><suffix>`)
+  # It should match a Vault database role
+
+# Credentials config
+credentials:
+  # What engine use by default to get credentials
+  default_engine: 'vault'
+  # Vault specific configuration
+  vault:
+    role_suffix: '-monitoring'
+  # Weather to not configure those discovered instances if credentials for them have not been discovered
+  # If set to `false` it will throw an error if the credentials are not found
+  skip_not_found: true
+
+# Time between discoveries
+loop_interval: 15
+# Name of the docker network where all containers will be running in
+docker_network_name: 'prometheus_rds'
+log_level: DEBUG
+
+# Nginx config
+nginx:
+  # Image to use for the Nginx container
+  docker_image: 'nginx'
+  # Container name for the Nginx proxy
+  docker_name: 'mysqld-exporter-proxy'
+  # Nginx port to expose (will point to nginx_docker_port)
+  docker_port: 9900
+  # Nginx listening port inside the container
+  listening_port: 80
+  # Alternative nginx config file, default one is 'nginx.conf' within the nginx module
+  # config_file: ''
+
+mysqld_exporter:
+  docker_image: 'prom/mysqld-exporter'
