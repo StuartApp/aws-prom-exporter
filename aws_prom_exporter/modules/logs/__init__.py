@@ -2,7 +2,7 @@ import logging
 import sys
 
 
-class mysqld_exporter_logger(object):
+class aws_prom_exporter_logger(object):
     loggers = set()
 
     def __init__(self, name, format='%(asctime)s %(name)s - %(levelname)s - %(message)s', level='INFO'):
@@ -39,4 +39,4 @@ class mysqld_exporter_logger(object):
         self.logger.warn(msg, extra=extra)
 
 
-logger = mysqld_exporter_logger('mysqld_exporter')
+logger = aws_prom_exporter_logger('aws-prom-exporter')

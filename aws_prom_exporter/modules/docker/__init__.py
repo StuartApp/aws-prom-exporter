@@ -2,7 +2,7 @@ import docker
 import atexit
 import logging
 
-logger = logging.getLogger('mysqld_exporter')
+logger = logging.getLogger('aws-prom-exporter')
 
 
 class Docker:

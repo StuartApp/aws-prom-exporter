@@ -2,7 +2,7 @@ import boto3
 import re
 import logging
 
-logger = logging.getLogger('mysqld_exporter')
+logger = logging.getLogger('aws-prom-exporter')
 
 
 class Rds:
