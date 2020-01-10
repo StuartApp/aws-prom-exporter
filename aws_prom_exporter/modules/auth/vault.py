@@ -1,11 +1,16 @@
 import hvac
 import json
 import logging
+import boto3
 
 logger = logging.getLogger('aws-prom-exporter')
 
 
 class VaultCredentialNotFound(Exception):
+    pass
+
+
+class VaultNotAuthenticated(Exception):
     pass
 
 
@@ -16,7 +21,19 @@ class Vault:
     def __init__(self, **kwargs):
         self.client = hvac.Client(kwargs)
         if not self.client.is_authenticated():
-            raise Exception("Vault could not be authenticated")
+            # Try through IAM login
+            try:
+                credentials = boto3.Session().get_credentials()
+                self.client.auth.aws.iam_login(
+                    credentials.access_key, credentials.secret_key, credentials.token)
+                if not self.client.is_authenticated():
+                    raise Exception("Vault could not be authenticated")
+            except hvac.exceptions.InvalidRequest:
+                pass
+            finally:
+                if not self.client.is_authenticated():
+                    raise VaultNotAuthenticated(
+                        "Vault could not be authenticated")
 
     def get_database_cred(self, role):
         if self.database_cred:

@@ -4,7 +4,7 @@ from modules.config import config
 from modules.docker import Docker
 from modules.nginx import Nginx
 from modules.aws.rds import Rds
-from modules.auth.vault import Vault, VaultCredentialNotFound
+from modules.auth.vault import Vault, VaultCredentialNotFound, VaultNotAuthenticated
 from modules.prometheus import Exporter
 from modules.logs import logger
 import time
@@ -44,8 +44,12 @@ while True:
 
     for group in rds_info:
         if group not in vault_connections:
-            vault_connections[group] = Vault()
-
+            try:
+                vault_connections[group] = Vault()
+            except VaultNotAuthenticated:
+                logger.error(
+                    "Authentication against Vault failed, couldn't get a valid token")
+                sys.exit(1)
         try:
             creds = vault_connections[group].get_database_cred(
                 '{}{}'.format(group, config.credentials.vault.role_suffix))
