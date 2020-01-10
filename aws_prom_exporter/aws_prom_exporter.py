@@ -5,21 +5,22 @@ from modules.docker import Docker
 from modules.nginx import Nginx
 from modules.aws.rds import Rds
 from modules.auth.vault import Vault, VaultCredentialNotFound
-from modules.prometheus.mysqld_exporter import Mysqld_exporter
+from modules.prometheus import Exporter
 from modules.logs import logger
 import time
 import sys
+import signal
+
+vault_connections = {}
+mysqld_exporters = {}
 
 
-def exception_hook(exctype, value, traceback):
-    if exctype == KeyboardInterrupt:
-        print(')CTRL-C captured, cleaning up')
-    else:
-        sys.__excepthook__(exctype, value, traceback)
+def exit_gracefully(signum, frame):
+    sys.exit(0)
 
 
-sys.excepthook = exception_hook
-
+signal.signal(signal.SIGINT, exit_gracefully)
+signal.signal(signal.SIGTERM, exit_gracefully)
 
 logger.set_level(config.log_level)
 
@@ -33,9 +34,6 @@ logger.debug('Setup Prometheus proxy')
 nginx = Nginx(docker.network_name, config.nginx.docker_image, config.nginx.docker_name,
               config.nginx.listening_port, config.nginx.docker_port, config.nginx.config_file)
 nginx.run()
-
-vault_connections = {}
-mysqld_exporters = {}
 
 rds = Rds(id_filter=r'{}'.format(config.rds.search_regex))
 
@@ -57,26 +55,24 @@ while True:
             raise
 
         for instance in rds_info[group]:
-            address = instance['Address']
-            instance_id = address.split('.')[0]
+            data = {}
+            data['endpoint'] = instance['Address']
+            data['port'] = instance['Port']
+            data['credentials'] = creds
+            data['docker_image'] = config.prometheus.exporter.mysqld.docker_image
+            instance_id = data['endpoint'].split('.')[0]
             instance_ids.append(instance_id)
-            port = instance['Port']
 
             if instance_id not in mysqld_exporters:
-                mysqld_exporters[instance_id] = Mysqld_exporter(docker.network_name,
-                                                                instance_id,
-                                                                address, port,
-                                                                creds,
-                                                                config.mysqld_exporter.docker_image
-                                                                )
+                # Create new exporters
+                mysqld_exporters[instance_id] = Exporter(instance_id,
+                                                         'mysqld',
+                                                         data
+                                                         )
                 mysqld_exporters[instance_id].run()
 
-            if mysqld_exporters[instance_id].credentials['username'] != creds['username'] or \
-                    mysqld_exporters[instance_id].credentials['password'] != creds['password']:
-                mysqld_exporters[instance_id].set_data_source_name(
-                    address, port, creds)
-                mysqld_exporters[instance_id].stop()
-                mysqld_exporters[instance_id].run()
+            # Refresh exporter credentials if they have changed
+            mysqld_exporters[instance_id].refresh(data)
 
     # Old exporters cleanup
     for me in mysqld_exporters:

@@ -7,7 +7,6 @@ logger = logging.getLogger('mysqld_exporter')
 config_defaults = {
     'rds': {
         'search_regex': '.*',
-
     },
     'credentials': {
         'default_engine': 'vault',
@@ -26,8 +25,13 @@ config_defaults = {
         'listening_port': 80,
         'config_file': None,
     },
-    'mysqld_exporter': {
-        'docker_image': 'prom/mysqld-exporter',
+    'prometheus': {
+        'file_sd_path': '/etc/prometheus/file_sd',
+        'exporter': {
+            'mysql': {
+                'docker_image': 'prom/mysqld-exporter'
+            }
+        }
     }
 }
 

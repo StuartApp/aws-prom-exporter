@@ -16,7 +16,7 @@ setuptools.setup(
         'docker', 'pyyaml', 'boto3', 'hvac'
     ],
     scripts=['bin/aws-prom-exporter'],
-    version='0.1',
+    version='0.2',
     author="Jordi Clariana",
     author_email="j.clariana@stuart.com",
     description="Dynamically create Prometheus exporters for AWS resources like RDS or Elasticache",

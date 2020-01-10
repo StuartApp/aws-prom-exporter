@@ -48,10 +48,16 @@ nginx:
   # Alternative full path of an nginx config file, if not defined or empty it will use a default one
   #config_file: ''
 
-# MySQL exporter
-mysqld_exporter:
-  # Docker image to use for the MySQL exporter
-  docker_image: prom/mysqld-exporter
+# Prometheus config
+prometheus:
+  # File where to write `file_sd` files for Prometheus to consume
+  file_sd_path: '/etc/prometheus/file_sd'
+  # List of configured exporters and its parameters
+  exporter:
+    # MySQL exporter
+    mysqld:
+      # Docker image to use for the MySQL exporter
+      docker_image: 'prom/mysqld-exporter'
 ```
 
 ## Run
