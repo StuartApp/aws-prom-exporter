@@ -1,6 +1,7 @@
 import boto3
 import re
 import logging
+from . import helpers
 
 logger = logging.getLogger('aws-prom-exporter')
 
@@ -13,7 +14,9 @@ class Rds:
     aurora_engine_filters = {}
 
     def __init__(self, id_filter=None, engine=None):
-        self.client = boto3.client('rds')
+        self.client = boto3.client(
+            'rds', region_name=helpers.get_region())
+
         self.id_filter = self._check_re(id_filter)
         if engine:
             self.classic_engine_filters = [{'Name': 'engine', 'Value': engine}]

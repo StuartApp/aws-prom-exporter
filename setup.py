@@ -13,7 +13,7 @@ with open("README.md", "r") as fh:
 setuptools.setup(
     name='aws_prom_exporter',
     install_requires=[
-        'docker', 'pyyaml', 'boto3', 'hvac'
+        'docker', 'pyyaml', 'boto3>=1.10', 'hvac'
     ],
     scripts=['bin/aws-prom-exporter'],
     version='0.2',

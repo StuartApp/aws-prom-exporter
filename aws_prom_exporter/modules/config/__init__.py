@@ -19,7 +19,7 @@ config_defaults = {
     'loop_interval': 60,
     'docker_network_name': 'prometheus_rds',
     'nginx': {
-        'docker_image': 'nginx',
+        'docker_image': 'nginx:1-alpine',
         'docker_name': 'mysqld-exporter-proxy',
         'docker_port': 9900,
         'listening_port': 80,
