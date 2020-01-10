@@ -23,7 +23,7 @@ class FileSD:
                 'labels': {
                     'type': self.exporter_type,
                     'instance': self.name,
-                    'metric_path': '/{}'.format(self.name)
+                    'metrics_path': '/{}'.format(self.name)
                 },
                 'targets': [self.target]
             }
