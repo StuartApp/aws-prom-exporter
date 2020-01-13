@@ -28,7 +28,7 @@ config_defaults = {
     'prometheus': {
         'file_sd_path': '/etc/prometheus/file_sd',
         'exporter': {
-            'mysql': {
+            'mysqld': {
                 'docker_image': 'prom/mysqld-exporter'
             }
         }
