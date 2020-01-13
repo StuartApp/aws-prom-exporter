@@ -41,8 +41,12 @@ class Vault:
                 return self.database_cred['data']
 
         logger.debug('Getting a credential from Vault for {}'.format(role))
-        response = self.client.adapter.get(
-            '/v1/database/creds/{}'.format(role))
+        try:
+            response = self.client.adapter.get(
+                '/v1/database/creds/{}'.format(role))
+        except hvac.exceptions.InvalidRequest:
+            raise VaultCredentialNotFound(
+                "Was not possible to get database credentials for role '{}'".format(role))
         if response.status_code != 200:
             raise VaultCredentialNotFound(
                 "Was not possible to get database credentials for role '{}'".format(role))
